@@ -1,3 +1,28 @@
+"""
+This module is used to estimate the return on investment when buying an apartment, renting it,
+and selling it after a few years.
+
+The calculation steps (in high level) are:
+1. Calculate the monthly cashflows from the apartment (rent - mortgage payment).
+2. Calculate the missed gains from the negative cashflows that could have been invested in the market.
+3. Calculate left cash when selling the apartment (sell price - mortgage balance - sell expenses - missed market gains).
+4. Calculate the average annual return on the investment.
+
+Notes and assumptions:
+    - The calculation does not take into account the tax implications of the investment, and inflation.
+        * Most real-estate investments are tax-free in Israel (for a single apartment).
+        * When providing the annual market return in the assumptions, it should be after accounting for tax.
+            For example, if the market return is 10% and the tax is 25%, then you should provide 7.5%.
+        * Not accounting for inflation is a simplification - every investment is affected by inflation...
+    - The calculation assumes that the apartment is rented for the entire investment term.
+    - The calculation assumes that the apartment is sold at the end of the investment term.
+    - The calculation assumes that the rent increases every few years.
+    - The calculation assumes that the mortgage is paid in equal monthly payments.
+    - The calculation assumes that the mortgage interest is constant throughout the investment term.
+        * In reality, the interest rate might change, and the mortgage might be refinanced.
+        * As we don't have a crystal ball, we can't predict the future interest rates.
+"""
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -37,11 +62,11 @@ class Mortgage:
         )
 
     @property
-    def loan_amount(self):
+    def loan_amount(self) -> float:
         return self.apartment_assessor_price_evaluation * self.financing_percentage
 
     @property
-    def monthly_payment(self):
+    def monthly_payment(self) -> float:
         return float(self.loan.monthly_payment)
 
 
@@ -58,7 +83,7 @@ class ApartmentInvestmentSummary:
     total_loss_from_cashflows: float
 
     @property
-    def avg_annual_return(self):
+    def avg_annual_return(self) -> float:
         return (self.final_capital / self.initial_capital) ** (1 / self.investment_term) - 1
 
     def __str__(self):
