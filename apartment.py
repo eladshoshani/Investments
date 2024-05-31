@@ -26,7 +26,6 @@ Notes and assumptions:
 from dataclasses import dataclass
 from typing import Optional
 
-import yaml
 from mortgage import Loan
 
 SELL_EXPENSES_PERCENTAGE = 0.025 * 1.17  # 2.5% of the sell price (+VAT)
@@ -117,8 +116,9 @@ def investment_estimation(
     mortgage: Mortgage,
     assumptions: Assumptions,
 ) -> ApartmentInvestmentSummary:
-    cur_apartment_value = assumptions.new_apartment_current_value or apartment_buy_price
-    apartment_sell_price = cur_apartment_value * ((1 + assumptions.annual_apartment_price_growth) ** investment_term)
+    apartment_sell_price = (assumptions.new_apartment_current_value or apartment_buy_price) * (
+        (1 + assumptions.annual_apartment_price_growth) ** investment_term
+    )
 
     # Calculate the loss (or gain) from not investing the (probably negative) cashflows in the market each month
     cashflows = monthly_cashflows(investment_term, mortgage, assumptions)
@@ -175,5 +175,4 @@ if __name__ == "__main__":
             # new_apartment_current_value=2_550_000,
         ),
     )
-    print(yaml.dump(estimation))
-    print(f"Average annual return: {estimation.avg_annual_return:.2%}")
+    print(estimation)
