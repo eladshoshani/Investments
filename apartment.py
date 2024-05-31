@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
+import yaml
 from mortgage import Loan
 
 SELL_EXPENSES_PERCENTAGE = 0.025 * 1.17  # 2.5% of the sell price (+VAT)
@@ -52,13 +53,26 @@ class ApartmentInvestmentSummary:
     buy_price: float
     sell_price: float
     interest_paid_on_mortgage: float
-    monthly_cashflows: list[float]
+    monthly_distinct_cashflows: list[float]
     # Also take into account missed gains from negative cashflows that could have been invested in the market:
     total_loss_from_cashflows: float
 
     @property
     def avg_annual_return(self):
         return (self.final_capital / self.initial_capital) ** (1 / self.investment_term) - 1
+
+    def __str__(self):
+        return (
+            f"Average annual return: {self.avg_annual_return:.2%}\n"
+            f"Initial capital: {self.initial_capital}\n"
+            f"Final capital: {self.final_capital}\n"
+            f"Buy price: {self.buy_price}\n"
+            f"Sell price: {self.sell_price}\n"
+            f"Investment term: {self.investment_term}\n"
+            f"Interest paid on mortgage: {self.interest_paid_on_mortgage}\n"
+            f"Monthly (distinct) cashflows: {self.monthly_distinct_cashflows}\n"
+            f"Total loss from cashflows: {self.total_loss_from_cashflows}\n"
+        )
 
 
 def monthly_cashflows(investment_term: int, mortgage: Mortgage, assumptions: Assumptions) -> list[float]:
@@ -78,11 +92,6 @@ def investment_estimation(
     mortgage: Mortgage,
     assumptions: Assumptions,
 ) -> ApartmentInvestmentSummary:
-    """
-    Calculate the estimated return on investment for an apartment investment.
-    :param new_apartment_current_value: Relevant for Pinuy-Binuy investments. This is th estimated current value of
-        the apartment that will be built.
-    """
     cur_apartment_value = assumptions.new_apartment_current_value or apartment_buy_price
     apartment_sell_price = cur_apartment_value * ((1 + assumptions.annual_apartment_price_growth) ** investment_term)
 
@@ -116,7 +125,7 @@ def investment_estimation(
         buy_price=apartment_buy_price,
         sell_price=apartment_sell_price,
         interest_paid_on_mortgage=float(mortgage_end_state.total_interest),
-        monthly_cashflows=cashflows,
+        monthly_distinct_cashflows=sorted(set(cashflows)),
         total_loss_from_cashflows=total_loss_from_cashflows,
     )
     return ret
@@ -138,7 +147,8 @@ if __name__ == "__main__":
             rent_increase_delta=2,
             annual_market_return=0.075,
             buy_expenses=100_000,
+            # new_apartment_current_value=2_550_000,
         ),
     )
-    print(estimation)
+    print(yaml.dump(estimation))
     print(f"Average annual return: {estimation.avg_annual_return:.2%}")
