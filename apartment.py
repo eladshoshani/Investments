@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from mortgage import Loan
 
@@ -12,6 +13,7 @@ class Assumptions:
     rent_increase_delta: int  # Number of years between rent increases
     annual_market_return: float
     buy_expenses: float  # Expenses when buying the apartment (for example for a lawyer, etc.)
+    new_apartment_current_value: Optional[float] = None  # Relevant for Pinuy-Binuy investments
 
     @staticmethod
     def calc_sell_expenses(sell_price: float) -> float:
@@ -81,7 +83,8 @@ def investment_estimation(
     :param new_apartment_current_value: Relevant for Pinuy-Binuy investments. This is th estimated current value of
         the apartment that will be built.
     """
-    apartment_sell_price = apartment_buy_price * ((1 + assumptions.annual_apartment_price_growth) ** investment_term)
+    cur_apartment_value = assumptions.new_apartment_current_value or apartment_buy_price
+    apartment_sell_price = cur_apartment_value * ((1 + assumptions.annual_apartment_price_growth) ** investment_term)
 
     # Calculate the loss (or gain) from not investing the (probably negative) cashflows in the market each month
     cashflows = monthly_cashflows(investment_term, mortgage, assumptions)
