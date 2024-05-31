@@ -115,7 +115,7 @@ def investment_estimation(
     final_capital = (
         apartment_sell_price
         - assumptions.calc_sell_expenses(apartment_sell_price)
-        - float(mortgage_end_state.total_interest + mortgage_end_state.balance)
+        - float(mortgage_end_state.balance)
         - total_loss_from_cashflows
     )
     ret = ApartmentInvestmentSummary(
