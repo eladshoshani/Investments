@@ -28,7 +28,7 @@ from typing import Optional
 
 from mortgage import Loan
 
-SELL_EXPENSES_PERCENTAGE = 0.025 * 1.17  # 2.5% of the sell price (+VAT)
+SELL_EXPENSES_PERCENTAGE = 0.025 * 1.18  # 2.5% of the sell price (+VAT)
 
 
 @dataclass
