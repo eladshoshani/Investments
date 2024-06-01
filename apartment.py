@@ -94,7 +94,7 @@ class ApartmentInvestmentSummary:
             f"Sell price: {self.sell_price}\n"
             f"Investment term: {self.investment_term}\n"
             f"Interest paid on mortgage: {self.interest_paid_on_mortgage}\n"
-            f"Monthly (distinct) cashflows: {self.monthly_distinct_cashflows}\n"
+            f"Monthly (distinct) cashflows:\n{self.monthly_distinct_cashflows}\n"
             f"Total loss from cashflows: {self.total_loss_from_cashflows}\n"
         )
 
