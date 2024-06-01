@@ -54,20 +54,16 @@ python apartment.py
 Example output:
 
 ```text
-buy_price: 1900000
-final_capital: 1463671.724206964
-initial_capital: 650000.0
-interest_paid_on_mortgage: 344510.1627375477
-investment_term: 7
-monthly_distinct_cashflows:
-- -2625.8
-- -2069.5999999999995
-- -1444.6536799999985
-- -742.4639948479971
-sell_price: 2856897.4920835854
-total_loss_from_cashflows: 213718.33039330796
-
-Average annual return: 12.30%
+Average annual return: 20.60%
+Initial capital: 650000.0
+Final capital: 2411485.057962168
+Buy price: 1900000
+Sell price: 3834257.1604279694
+Investment term: 7 years
+Interest paid on mortgage: 344510.1627375477
+Monthly (distinct) cashflows:
+[-2625.8, -2069.5999999999995, -1444.6536799999985, -742.4639948479971]
+Total loss from cashflows: 213718.33039330796
 ```
 
 ## Contributing
