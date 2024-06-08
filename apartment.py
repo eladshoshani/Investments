@@ -33,6 +33,7 @@ SELL_EXPENSES_PERCENTAGE = 0.025 * 1.18  # 2.5% of the sell price (+VAT)
 
 @dataclass
 class Assumptions:
+    investment_term: int
     annual_apartment_price_growth: float
     annual_rent_percentage: float
     rent_increase_delta: int  # Number of years between rent increases
@@ -112,16 +113,15 @@ def monthly_cashflows(investment_term: int, mortgage: Mortgage, assumptions: Ass
 
 
 def investment_estimation(
-    investment_term: int,
     mortgage: Mortgage,
     assumptions: Assumptions,
 ) -> ApartmentInvestmentSummary:
     apartment_sell_price = (assumptions.new_apartment_current_value or mortgage.apartment_buy_price) * (
-        (1 + assumptions.annual_apartment_price_growth) ** investment_term
+        (1 + assumptions.annual_apartment_price_growth) ** assumptions.investment_term
     )
 
     # Calculate the loss (or gain) from not investing the (probably negative) cashflows in the market each month
-    cashflows = monthly_cashflows(investment_term, mortgage, assumptions)
+    cashflows = monthly_cashflows(assumptions.investment_term, mortgage, assumptions)
     market_monthly_return = (1 + assumptions.annual_market_return) ** (1 / 12) - 1
     market_capital_missed_gains = 0
     market_capital_gains = 0
@@ -136,7 +136,7 @@ def investment_estimation(
 
     # Calculate the profit from the apartment investment
     initial_invested_capital = assumptions.buy_expenses + (mortgage.apartment_buy_price - mortgage.loan_amount)
-    mortgage_end_state = mortgage.loan.schedule(investment_term * 12)
+    mortgage_end_state = mortgage.loan.schedule(assumptions.investment_term * 12)
     final_capital = (
         apartment_sell_price
         - assumptions.calc_sell_expenses(apartment_sell_price)
@@ -146,7 +146,7 @@ def investment_estimation(
     ret = ApartmentInvestmentSummary(
         initial_capital=initial_invested_capital,
         final_capital=final_capital,
-        investment_term=investment_term,
+        investment_term=assumptions.investment_term,
         buy_price=mortgage.apartment_buy_price,
         sell_price=apartment_sell_price,
         interest_paid_on_mortgage=float(mortgage_end_state.total_interest),
@@ -158,7 +158,6 @@ def investment_estimation(
 
 if __name__ == "__main__":
     estimation = investment_estimation(
-        investment_term=7,
         mortgage=Mortgage(
             apartment_buy_price=1_900_000,
             apartment_assessor_price_evaluation=1_800_000,
@@ -167,6 +166,7 @@ if __name__ == "__main__":
             loan_term=25,
         ),
         assumptions=Assumptions(
+            investment_term=7,
             annual_apartment_price_growth=0.06,
             annual_rent_percentage=0.03,
             rent_increase_delta=2,
