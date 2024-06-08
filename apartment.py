@@ -47,6 +47,7 @@ class Assumptions:
 
 @dataclass
 class Mortgage:
+    apartment_buy_price: float
     apartment_assessor_price_evaluation: float
     financing_percentage: float  # for example, 0.75 for 75%
     interest_rate: float  # annual interest rate (for example, 0.03 for 3%)
@@ -62,7 +63,7 @@ class Mortgage:
 
     @property
     def loan_amount(self) -> float:
-        return self.apartment_assessor_price_evaluation * self.financing_percentage
+        return min(self.apartment_buy_price, self.apartment_assessor_price_evaluation) * self.financing_percentage
 
     @property
     def monthly_payment(self) -> float:
@@ -111,12 +112,11 @@ def monthly_cashflows(investment_term: int, mortgage: Mortgage, assumptions: Ass
 
 
 def investment_estimation(
-    apartment_buy_price: float,
     investment_term: int,
     mortgage: Mortgage,
     assumptions: Assumptions,
 ) -> ApartmentInvestmentSummary:
-    apartment_sell_price = (assumptions.new_apartment_current_value or apartment_buy_price) * (
+    apartment_sell_price = (assumptions.new_apartment_current_value or mortgage.apartment_buy_price) * (
         (1 + assumptions.annual_apartment_price_growth) ** investment_term
     )
 
@@ -135,7 +135,7 @@ def investment_estimation(
     total_loss_from_cashflows = market_capital_missed_gains - market_capital_gains
 
     # Calculate the profit from the apartment investment
-    initial_invested_capital = assumptions.buy_expenses + (apartment_buy_price - mortgage.loan_amount)
+    initial_invested_capital = assumptions.buy_expenses + (mortgage.apartment_buy_price - mortgage.loan_amount)
     mortgage_end_state = mortgage.loan.schedule(investment_term * 12)
     final_capital = (
         apartment_sell_price
@@ -147,7 +147,7 @@ def investment_estimation(
         initial_capital=initial_invested_capital,
         final_capital=final_capital,
         investment_term=investment_term,
-        buy_price=apartment_buy_price,
+        buy_price=mortgage.apartment_buy_price,
         sell_price=apartment_sell_price,
         interest_paid_on_mortgage=float(mortgage_end_state.total_interest),
         monthly_distinct_cashflows=sorted(set(cashflows)),
@@ -158,9 +158,9 @@ def investment_estimation(
 
 if __name__ == "__main__":
     estimation = investment_estimation(
-        apartment_buy_price=1_900_000,
         investment_term=7,
         mortgage=Mortgage(
+            apartment_buy_price=1_900_000,
             apartment_assessor_price_evaluation=1_800_000,
             financing_percentage=0.75,
             interest_rate=0.04,
