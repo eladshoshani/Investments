@@ -156,7 +156,7 @@ def investment_estimation(
     return ret
 
 
-if __name__ == "__main__":
+def main():
     estimation = investment_estimation(
         mortgage=Mortgage(
             apartment_buy_price=1_900_000,
@@ -166,13 +166,17 @@ if __name__ == "__main__":
             loan_term=25,
         ),
         assumptions=Assumptions(
-            investment_term=7,
+            investment_term=9,
             annual_apartment_price_growth=0.06,
             annual_rent_percentage=0.03,
             rent_increase_delta=2,
             annual_market_return=0.075,
             buy_expenses=100_000,
-            # new_apartment_current_value=2_550_000,
+            # new_apartment_current_value=3_150_000,
         ),
     )
     print(estimation)
+
+
+if __name__ == "__main__":
+    main()
