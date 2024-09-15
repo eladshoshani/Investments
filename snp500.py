@@ -1,6 +1,7 @@
 from typing import Optional
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 # Assuming monthly_closing_prices is available (this is the monthly price data)
@@ -48,7 +49,7 @@ def get_dca_return_calculator(buying_period: Optional[int] = None, money_market_
 
 
 def get_y_axis(calc_func, prices, investment_period):
-    return [calc_func(prices, i, investment_period) for i in range(len(prices) - investment_period)]
+    return [calc_func(prices, i, investment_period) * 100 for i in range(len(prices) - investment_period)]
 
 def main():
     prices = get_monthly_closing_prices()
@@ -56,17 +57,33 @@ def main():
     axes = axes.ravel()  # Flatten the 2D array of axes
 
 
-    dca_return = get_dca_return_calculator(money_market_fund_annual_interest=0.03)   # in the future test also shorter buying periods
+    dca_return = get_dca_return_calculator(money_market_fund_annual_interest=0.0)   # in the future test also shorter buying periods
     for idx, years in enumerate(INVESTMENT_PERIODS):
         returns_lump_sum = get_y_axis(lump_sum_return, prices, investment_period=years * 12)
         returns_dca = get_y_axis(dca_return, prices, investment_period=years * 12)
 
+        # Calculate and display the mean and standard deviation
+        lump_sum_mean = np.mean(returns_lump_sum)
+        lump_sum_std = np.std(returns_lump_sum)
+        dca_mean = np.mean(returns_dca)
+        dca_std = np.std(returns_dca)
+
+        # Add text with mean and std
+        axes[idx].text(0.05, 0.95, f"Lump-Sum:\nMean: {lump_sum_mean:.4}\nStd: {lump_sum_std:0.4}",
+                       transform=axes[idx].transAxes, fontsize=10, verticalalignment='top', color='orange')
+        axes[idx].text(0.05, 0.80, f"DCA:\nMean: {dca_mean:.4}\nStd: {dca_std:.4}",
+                       transform=axes[idx].transAxes, fontsize=10, verticalalignment='top', color='blue')
+
         # Plot the returns
-        axes[idx].plot(returns_lump_sum, "o-", color="orange", markersize=3, label="Lump-Sum")
-        axes[idx].plot(returns_dca, "o-", color="blue", markersize=3, label="DCA")
+        years_axis = [1927 + i // 12 for i in range(len(prices) - years * 12)]
+
+        # Plot the returns with smaller dots
+        axes[idx].plot(years_axis, returns_lump_sum, "o-", color="orange", markersize=3, label="Lump-Sum")
+        axes[idx].plot(years_axis, returns_dca, "o-", color="blue", markersize=3, label="DCA")
+
         axes[idx].set_title(f"{years} Year Investment Period", fontsize=14)
-        axes[idx].set_xlabel("Time (months)", fontsize=12)
-        axes[idx].set_ylabel("Annual Return", fontsize=12)
+        axes[idx].set_xlabel("Year", fontsize=12)
+        axes[idx].set_ylabel("Total Return (%)", fontsize=12)
         axes[idx].grid(True, linestyle='--', alpha=0.7)
         axes[idx].legend()
 
