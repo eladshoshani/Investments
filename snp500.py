@@ -8,7 +8,7 @@ import pandas as pd
 INITIAL_CAPITAL = 1_000_000
 
 # Parameters
-INVESTMENT_PERIODS = [1, 5, 10, 25]  # Years
+INVESTMENT_PERIODS = [2, 5, 10, 25]  # Years
 
 def get_monthly_closing_prices() -> list[float]:
     snp500_prices = pd.read_csv('SPX.csv')
@@ -57,7 +57,7 @@ def main():
     axes = axes.ravel()  # Flatten the 2D array of axes
 
 
-    dca_return = get_dca_return_calculator(money_market_fund_annual_interest=0.0)   # in the future test also shorter buying periods
+    dca_return = get_dca_return_calculator(buying_period=12, money_market_fund_annual_interest=0.03)   # in the future test also shorter buying periods
     for idx, years in enumerate(INVESTMENT_PERIODS):
         returns_lump_sum = get_y_axis(lump_sum_return, prices, investment_period=years * 12)
         returns_dca = get_y_axis(dca_return, prices, investment_period=years * 12)
